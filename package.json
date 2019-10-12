@@ -2,10 +2,11 @@
   "name": "bacon",
   "version": "1.0.0",
   "description": "Find the shortest path to Kevin Bacon on wikipedia.",
-  "main": "dist/app.js",
+  "main": "dist/electron.js",
   "scripts": {
     "start": "electron .",
-    "build": "tsc --watch"
+    "build": "npx webpack",
+    "dev": "npm run build && npm start"
   },
   "author": "Jake Harrington",
   "license": "MIT",
@@ -16,10 +17,14 @@
   "dependencies": {
     "@types/react": "^16.9.5",
     "@types/react-dom": "^16.9.1",
+    "css-loader": "^3.2.0",
     "electron": "^6.0.12",
+    "node-sass": "^4.12.0",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
+    "sass-loader": "^8.0.0",
     "source-map-loader": "^0.2.4",
+    "style-loader": "^1.0.0",
     "ts-loader": "^6.2.0",
     "typescript": "^3.6.4",
     "webpack": "^4.41.0"
