@@ -1,4 +1,5 @@
 import * as wikipedia from './wikipedia';
+import {URL} from 'url';
 import { Pool } from './pool';
 
 interface LinkScanResult {
@@ -41,7 +42,7 @@ class WikipediaScanner {
             return {
                 path: [this.startTitle],
                 jumps: 0,
-                time: 0
+                stats: this.stats
             }
         }
         const startTime = Date.now();
@@ -118,7 +119,7 @@ class WikipediaScanner {
 
         //if we've found a link, just return that
         const scans: LinkScanResult[] = await pool.done(),
-            found = scans.find(result => result.found);
+            found = scans.find(result => {return result && result.found});
 
         //otherwise keep scanning the next level
         return found ||  await this.scan(++level, nextChains);
@@ -173,5 +174,16 @@ class WikipediaScanner {
 }
 
 export const scan = async (startTitle: string, endTitle: string, progressLogFn: Function) => {
-    return await new WikipediaScanner(startTitle, endTitle, progressLogFn).start();
+    /**
+     * If a wikipedia page URL was entered, parse the title out of ti
+     * @param titleOrUrl - wikipedia page title or a URL to a wikipedia page
+     */
+    const parseTitle = (titleOrUrl: string) => {
+        if (!titleOrUrl.includes('wikipedia.org/wiki')) {
+            return titleOrUrl; //just a title
+        }
+        const u = new URL(titleOrUrl)
+        return u.pathname.replace('/wiki/', '');
+    }
+    return await new WikipediaScanner(parseTitle(startTitle), parseTitle(endTitle), progressLogFn).start();
 };
