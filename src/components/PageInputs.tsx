@@ -40,20 +40,23 @@ export default class PageInputs extends React.Component<PageInputProps, PageInpu
         })
     }
     render() {
-        const titleChange = (type: string) => (e : ChangeEvent<HTMLInputElement>) => {
-            this.onWikiTitleChange(type, e.target.value);
-        }
+        const titleChange = (type: string) => (e: ChangeEvent<HTMLInputElement>) => {
+                this.onWikiTitleChange(type, e.target.value);
+            },
+            titlePlaceholder = 'Wikipedia page url or title'
+
         return (
             <div>
                 <form onSubmit={this.onSubmit.bind(this)}>
-                    <label>From
-                        <input type="text" id="from" onChange={titleChange('from')} />
+                    <label>From: 
+                        <input type="text" id="from" onChange={titleChange('from')} placeholder={titlePlaceholder} />
                     </label>
-                    <label>To
-                        <input type="text" id="to" onChange={titleChange('to')} defaultValue={this.state.to} />
-                    </label>
-                    <button id="scan" disabled={this.props.isScanning}>Scan</button>
                     <br />
+                    <label>To: 
+                        <input type="text" id="to" onChange={titleChange('to')} defaultValue={this.state.to} placeholder={titlePlaceholder} />
+                    </label>
+                    <br />
+                    <button id="scan" disabled={this.props.isScanning}>Scan</button>
                 </form>
                 <p id="progress"></p>
             </div>
