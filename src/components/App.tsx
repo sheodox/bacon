@@ -1,16 +1,18 @@
 import React from 'react';
 import PageInputs from './PageInputs';
 import If from './If';
-const {ipcRenderer} = require('electron');
+const {ipcRenderer, shell} = require('electron');
 
 interface ScanInputs {
     from: string,
     to: string
 }
 interface AppState {
+    startTitle: string,
+    endTitle: string,
     progress: string,
     scanning: boolean,
-    foundPath: string,
+    foundPath: string[],
     foundJumps: number,
     stats: {
         scanDuration: number,
@@ -24,8 +26,10 @@ export default class App extends React.Component<{}, AppState>{
     constructor(props: any) {
         super(props);
         this.state = {
+            startTitle: '',
+            endTitle: '',
             progress: '',
-            foundPath: '',
+            foundPath: [],
             foundJumps: 0,
             scanning: false,
             stats: {
@@ -47,8 +51,11 @@ export default class App extends React.Component<{}, AppState>{
         ipcRenderer.send('scan-request', inputs);
 
         this.setState({
+            startTitle: inputs.from,
+            endTitle: inputs.to,
             scanning: true,
-            foundPath: '',
+            progress: '',
+            foundPath: [],
             foundJumps: 0
         })
 
@@ -56,7 +63,7 @@ export default class App extends React.Component<{}, AppState>{
             console.log(result);
             this.setState({
                 scanning: false,
-                foundPath: result.path.join(' → '),
+                foundPath: result.path,
                 foundJumps: result.jumps,
                 stats: result.stats
             })
@@ -68,15 +75,23 @@ export default class App extends React.Component<{}, AppState>{
         return `${Math.floor(seconds / 60)}:${pad(Math.round(seconds % 60))}`;
     }
     render() {
+        const pathLinks = this.state.foundPath.map((title:string) => {
+            const url = `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`,
+                openInBrowser = () => {
+                    shell.openExternal(url)
+                }
+            return <a title={`Click to view this Wikipedia page in your browser.\n${url}`} className="path-link" key={title} href="#" onClick={openInBrowser}>{title}</a>
+        })
+
         return (
             <div>
                 <PageInputs isScanning={this.state.scanning} submit={this.scan.bind(this)}></PageInputs>
                 <If renderWhen={this.state.scanning}>
                     <p>Scan in progress... checking {this.state.progress}</p>
                 </If>
-                <If renderWhen={this.state.foundPath !== ''}>
-                    <p>Found {this.state.foundPath}</p>
-                    <p>in {this.state.foundJumps} jumps</p>
+                <If renderWhen={this.state.foundPath.length > 0}>
+                    <p>You can get from {this.state.startTitle} to {this.state.endTitle} in {this.state.foundJumps} clicks.</p>
+                    <p>({pathLinks})</p>
                     <table>
                         <caption>Scan Statistics</caption>
                         <tbody>
