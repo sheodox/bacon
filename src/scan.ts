@@ -3,43 +3,60 @@ import { Pool } from './pool';
 
 interface LinkScanResult {
     found: boolean,
-    links: string[],
-    path: string[]
+    path: string[],
+    jumps?: number,
+    //if we haven't found the right page, these are the links found on the current one to check
+    links: string[]
 }
 
 let logNum = 0;
-function logInfrequently(str: string) {
-    if (logNum++ % 1000 === 0) {
-        console.log(str);
-    }
-}
 
 class WikipediaScanner {
     private checkedTitles: Set<string>;
     private maxPageChain: number;
-    private stats: { apiCalls: number, checkedTitles: number, retriedCalls: number};
+    private stats: {
+        scanDuration: number,
+        apiCalls: number,
+        checkedTitles: number,
+        retriedCalls: number
+    };
     private startTime: number;
     private found: boolean;
 
-    constructor(private startTitle: string, private endTitle: string) {
+    constructor(private startTitle: string, private endTitle: string, private progressLogFn: Function) {
         this.checkedTitles = new Set();
         this.maxPageChain = 10;
         this.startTime = 0;
         this.found = false;
 
         this.stats = {
+            scanDuration: 0,
             apiCalls: 0,
             checkedTitles: 0,
             retriedCalls: 0
         }
     }
     async start() {
-        this.startTime = Date.now();
-        const foundPath = await this.scan(0, [{ found: false, links: [this.startTitle], path: [] }])
-        if (foundPath) {
-            console.log(foundPath.path)
+        if (this.startTitle === this.endTitle) {
+            return {
+                path: [this.startTitle],
+                jumps: 0,
+                time: 0
+            }
         }
+        const startTime = Date.now();
+        const foundPath = await this.scan(0, [{
+            found: false,
+            links: [this.startTitle],
+            path: [],
+        }])
 
+        this.stats.scanDuration = Date.now() - startTime;
+        return {
+            path: foundPath.path,
+            jumps: foundPath.jumps,
+            stats: this.stats
+        }
     }
     checkTitle(title: string) {
         this.stats.checkedTitles++;
@@ -53,7 +70,7 @@ class WikipediaScanner {
 
         const nextChains: LinkScanResult[] = [];
 
-        const pool = new Pool(40);
+        const pool = new Pool(20);
 
         for (let i = 0; i < chains.length; i++) {
             const { links, path } = chains[i];
@@ -89,6 +106,9 @@ class WikipediaScanner {
                                 queue();
                                 return blankResponse;
                             }
+                            else {
+                                console.log(`error returned from ${links[j]} - ${e}`)
+                            }
                         }
                     })
                 }
@@ -112,33 +132,46 @@ class WikipediaScanner {
             .filter(link => !this.checkedTitles.has(link));
 
         this.stats.apiCalls++;
-        const found = links.some((link: string) => {
+        const found = links.reduce((foundLink: any,link: string) => {
+            if (foundLink) {
+                return foundLink;
+            }
+
             const pathToThis = [...pageChain, title, link],
                 prettyPathToThis = pathToThis.join(' → ');
 
-            logInfrequently(prettyPathToThis)
+            this.logInfrequently(prettyPathToThis)
 
             if (this.checkTitle(link)) {
-                console.table({
-                    from: this.startTitle,
-                    to: this.endTitle,
-                    jumps: pathToThis.length,
-                    path: prettyPathToThis,
-                    time: (Date.now() - this.startTime) / 1000 + 's elapsed',
-                    ...this.stats
-                })
-                return true;
+                return {
+                    found: true,
+                    path: pathToThis,
+                    //subtract one because the start isn't considered a jump and it's included in the path
+                    jumps: pathToThis.length - 1,
+                    links: []
+                }
             }
-        });
-        
+        }, null);
+
+        //if we've found a link
+        if (found) {
+            return found;
+        }
+        //if we haven't found it, we need to search through 'links' when we go down another level
         return {
-            found,
+            found: false,
             links,
-            path: [...pageChain, title]
+            path: [...pageChain, title],
         };
+    }
+
+    logInfrequently(str: string) {
+        if (logNum++ % 1000 === 0) {
+            this.progressLogFn(str);
+        }
     }
 }
 
-export const scan = async (startTitle: string, endTitle: string) => {
-    return await new WikipediaScanner(startTitle, endTitle).start();
+export const scan = async (startTitle: string, endTitle: string, progressLogFn: Function) => {
+    return await new WikipediaScanner(startTitle, endTitle, progressLogFn).start();
 };
