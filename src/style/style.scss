@@ -10,3 +10,12 @@ form {
         line-height: 2rem;
     }
 }
+
+.path-link {
+    text-decoration: none;
+
+    &:not(:last-of-type)::after {
+        content: ' → ';
+        color: black;
+    }
+}
