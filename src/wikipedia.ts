@@ -1,7 +1,7 @@
 import * as req from './req';
 import url from 'url';
 
-function getApiUrl(query:any) {
+export const getApiUrl = (query:any) => {
     return url.format({
         protocol: 'https',
         hostname: 'en.wikipedia.org',
@@ -20,7 +20,12 @@ export const getLinkedTitles = async (pageTitle:string) : Promise<string[]> => {
 
     const pages = linksResult.query.pages
     //only getting one page at a time, just need the first page included
-    return (pages[Object.keys(pages)[0]]
+    const pageNumber : string = Object.keys(pages)[0]
+    //page doesn't exist
+    if (pageNumber === '-1') {
+        throw new Error(`There is no page named "${pageTitle}"`)
+    }
+    return (pages[pageNumber]
         .links || []).map((page: {ns: number, title: string}) => {
             return page.title
         });

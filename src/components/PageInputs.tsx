@@ -48,15 +48,13 @@ export default class PageInputs extends React.Component<PageInputProps, PageInpu
         return (
             <div>
                 <form onSubmit={this.onSubmit.bind(this)}>
-                    <label>From: 
-                        <input type="text" id="from" onChange={titleChange('from')} placeholder={titlePlaceholder} />
+                    <label>From <input autoFocus required type="text" id="from" onChange={titleChange('from')} placeholder={titlePlaceholder} />
                     </label>
                     <br />
-                    <label>To: 
-                        <input type="text" id="to" onChange={titleChange('to')} defaultValue={this.state.to} placeholder={titlePlaceholder} />
+                    <label>To <input required type="text" id="to" onChange={titleChange('to')} defaultValue={this.state.to} placeholder={titlePlaceholder} />
                     </label>
                     <br />
-                    <button id="scan" disabled={this.props.isScanning}>Scan</button>
+                    <button id="scan" disabled={this.props.isScanning || !this.state.from || !this.state.to}>Scan</button>
                 </form>
                 <p id="progress"></p>
             </div>

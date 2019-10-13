@@ -14,6 +14,7 @@ interface AppState {
     scanning: boolean,
     foundPath: string[],
     foundJumps: number,
+    scanError: string,
     stats: {
         scanDuration: number,
         apiCalls: number,
@@ -32,6 +33,7 @@ export default class App extends React.Component<{}, AppState>{
             foundPath: [],
             foundJumps: 0,
             scanning: false,
+            scanError: '',
             stats: {
                 scanDuration: 0,
                 apiCalls: 0,
@@ -56,17 +58,26 @@ export default class App extends React.Component<{}, AppState>{
             scanning: true,
             progress: '',
             foundPath: [],
-            foundJumps: 0
+            foundJumps: 0,
+            scanError: ''
         })
 
         ipcRenderer.once('scan-result', (event: any, result: any) => {
-            console.log(result);
-            this.setState({
-                scanning: false,
-                foundPath: result.path,
-                foundJumps: result.jumps,
-                stats: result.stats
-            })
+            if (result.error) {
+                this.setState({
+                    scanning: false,
+                    scanError: result.error
+                });
+            }
+            else {
+                console.log(result);
+                this.setState({
+                    scanning: false,
+                    foundPath: result.path,
+                    foundJumps: result.jumps,
+                    stats: result.stats
+                })
+            }
         })
     }
     prettyMS(timeInMilliseconds: number) {
@@ -88,6 +99,9 @@ export default class App extends React.Component<{}, AppState>{
                 <PageInputs isScanning={this.state.scanning} submit={this.scan.bind(this)}></PageInputs>
                 <If renderWhen={this.state.scanning}>
                     <p>Scan in progress... checking {this.state.progress}</p>
+                </If>
+                <If renderWhen={!!this.state.scanError}>
+                    <p>{this.state.scanError}</p>
                 </If>
                 <If renderWhen={this.state.foundPath.length > 0}>
                     <p>You can get from {this.state.startTitle} to {this.state.endTitle} in {this.state.foundJumps} clicks.</p>
