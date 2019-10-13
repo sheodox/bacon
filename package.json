@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "build": "npx webpack",
-    "dev": "npm run build && npm start"
+    "dev": "npm run build && npm start -- devtools"
   },
   "author": "Jake Harrington",
   "license": "MIT",

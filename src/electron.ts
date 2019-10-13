@@ -7,15 +7,17 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 let win: any;
 const createWindow = () => {
     win = new BrowserWindow({
-        width: 1200, height: 800,
+        width: 800, height: 800,
         webPreferences: {
             nodeIntegration: true,
         }
     });
     win.on('close', () => win = null);
-    console.log(`path: ${path.join(__dirname, './index.html')}`)
     win.loadFile('index.html');
-    win.webContents.openDevTools();
+
+    if (process.argv.includes('devtools')) {
+        win.webContents.openDevTools();
+    }
     win.show();
 }
 app.on('ready', createWindow)
