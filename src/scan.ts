@@ -19,14 +19,12 @@ class WikipediaScanner {
         checkedTitles: number,
         retriedCalls: number
     };
-    private startTime: number;
     private found: boolean;
     private logNum: number;
 
     constructor(private startTitle: string, private endTitle: string, private progressLogFn: Function) {
         this.checkedTitles = new Set();
         this.maxPageChain = 10;
-        this.startTime = 0;
         this.found = false;
         this.logNum = 0;
 
@@ -40,6 +38,8 @@ class WikipediaScanner {
     async start() {
         if (this.startTitle === this.endTitle) {
             return {
+                from: this.startTitle,
+                to: this.endTitle,
                 path: [this.startTitle],
                 jumps: 0,
                 stats: this.stats
@@ -54,6 +54,8 @@ class WikipediaScanner {
 
         this.stats.scanDuration = Date.now() - startTime;
         return {
+            from: this.startTitle,
+            to: this.endTitle,
             path: foundPath.path,
             jumps: foundPath.jumps,
             stats: this.stats
@@ -185,5 +187,12 @@ export const scan = async (startTitle: string, endTitle: string, progressLogFn: 
         const u = new URL(titleOrUrl)
         return u.pathname.replace('/wiki/', '');
     }
-    return await new WikipediaScanner(parseTitle(startTitle), parseTitle(endTitle), progressLogFn).start();
+    const normalized = (title: string) => {
+        return wikipedia.getNormalizedTitle(title);
+    }
+    return await new WikipediaScanner(
+        await normalized(parseTitle(startTitle)),
+        await normalized(parseTitle(endTitle)),
+        progressLogFn)
+        .start();
 };

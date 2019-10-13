@@ -40,10 +40,6 @@ app.on('activate', function () {
 
 ipcMain.on('scan-request', async (event: any, titles: {from: string, to: string}) => {
     try {
-        //validate that both pages exist before starting to scan to some impossible destination
-        await getLinkedTitles(titles.from);
-        await getLinkedTitles(titles.to);
-
         const result = await scan(titles.from, titles.to, (progressStr: string) => {
             event.reply('scan-progress', progressStr)
         })

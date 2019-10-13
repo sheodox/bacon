@@ -70,8 +70,10 @@ export default class App extends React.Component<{}, AppState>{
                 });
             }
             else {
-                console.log(result);
                 this.setState({
+                    //make sure we're using the normalized titles
+                    startTitle: result.from,
+                    endTitle: result.to,
                     scanning: false,
                     foundPath: result.path,
                     foundJumps: result.jumps,
