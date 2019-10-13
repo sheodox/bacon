@@ -18,6 +18,9 @@ const createWindow = () => {
     if (process.argv.includes('devtools')) {
         win.webContents.openDevTools();
     }
+    else {
+        win.setMenuBarVisibility(false);
+    }
     win.show();
 }
 app.on('ready', createWindow)
