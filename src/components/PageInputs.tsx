@@ -46,8 +46,8 @@ export default class PageInputs extends React.Component<PageInputProps, PageInpu
             titlePlaceholder = 'Wikipedia page url or title'
 
         return (
-            <div>
-                <form onSubmit={this.onSubmit.bind(this)}>
+            <div className="center">
+                <form onSubmit={this.onSubmit.bind(this)} className="panel">
                     <label>From <input autoFocus required type="text" id="from" onChange={titleChange('from')} placeholder={titlePlaceholder} />
                     </label>
                     <br />

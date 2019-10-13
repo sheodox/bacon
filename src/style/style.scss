@@ -1,4 +1,4 @@
-$background: #272C38;
+$background: #1a1c1f;
 $neon-blue: #00d0ff;
 $neon-pink: #ff00bf;
 * {
@@ -11,9 +11,18 @@ body {
 
 }
 
+.panel:not(:empty) {
+    border-radius: 5px;
+    background: #222429;
+    padding: 3rem;
+}
+
 form {
+    text-align: right;
+    width: fit-content;
+
     label {
-        line-height: 2rem;
+        line-height: 3rem;
     }
 }
 
@@ -48,7 +57,21 @@ button {
     }
 }
 
+input {
+    background-color: darken($background, 5%);
+    color: white;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 3px;
+}
+
 h1 {
     text-shadow: $neon-pink 1px 2px, $neon-blue -2px -1px;
     font-family: "Audiowide", sans-serif;
+    text-align: center;
+}
+.center {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
 }

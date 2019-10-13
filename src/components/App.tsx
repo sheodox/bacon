@@ -97,37 +97,39 @@ export default class App extends React.Component<{}, AppState>{
         return (
             <div>
                 <PageInputs isScanning={this.state.scanning} submit={this.scan.bind(this)}></PageInputs>
-                <If renderWhen={this.state.scanning}>
-                    <p>Scan in progress... checking {this.state.progress}</p>
-                </If>
-                <If renderWhen={!!this.state.scanError}>
-                    <p>{this.state.scanError}</p>
-                </If>
-                <If renderWhen={this.state.foundPath.length > 0}>
-                    <p>You can get from {this.state.startTitle} to {this.state.endTitle} in {this.state.foundJumps} clicks.</p>
-                    <p>({pathLinks})</p>
-                    <table>
-                        <caption>Scan Statistics</caption>
-                        <tbody>
-                            <tr>
-                                <th>Scan Duration</th>
-                                <td>{this.prettyMS(this.state.stats.scanDuration)}</td>
-                            </tr>
-                            <tr>
-                                <th>API Calls</th>
-                                <td>{this.state.stats.apiCalls}</td>
-                            </tr>
-                            <tr>
-                                <th>Titles Checked</th>
-                                <td>{this.state.stats.checkedTitles}</td>
-                            </tr>
-                            <tr>
-                                <th>API Calls Retried</th>
-                                <td>{this.state.stats.retriedCalls}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </If>
+                <div className="panel">
+                    <If renderWhen={this.state.scanning}>
+                        <p>Scan in progress... checking {this.state.progress}</p>
+                    </If>
+                    <If renderWhen={!!this.state.scanError}>
+                        <p>{this.state.scanError}</p>
+                    </If>
+                    <If renderWhen={this.state.foundPath.length > 0}>
+                        <p>You can get from {this.state.startTitle} to {this.state.endTitle} in {this.state.foundJumps} clicks.</p>
+                        <p>({pathLinks})</p>
+                        <table>
+                            <caption>Scan Statistics</caption>
+                            <tbody>
+                                <tr>
+                                    <th>Scan Duration</th>
+                                    <td>{this.prettyMS(this.state.stats.scanDuration)}</td>
+                                </tr>
+                                <tr>
+                                    <th>API Calls</th>
+                                    <td>{this.state.stats.apiCalls}</td>
+                                </tr>
+                                <tr>
+                                    <th>Titles Checked</th>
+                                    <td>{this.state.stats.checkedTitles}</td>
+                                </tr>
+                                <tr>
+                                    <th>API Calls Retried</th>
+                                    <td>{this.state.stats.retriedCalls}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </If>
+                </div>
             </div>
         );
     }
