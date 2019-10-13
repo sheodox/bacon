@@ -28,6 +28,7 @@ class WikipediaScanner {
         this.found = false;
         this.logNum = 0;
 
+        //keep some statistics about the search
         this.stats = {
             scanDuration: 0,
             apiCalls: 0,
@@ -36,6 +37,7 @@ class WikipediaScanner {
         }
     }
     async start() {
+        //if the title is the same, don't even look for links, can't possibly find something shorter than zero clicks away
         if (this.startTitle === this.endTitle) {
             return {
                 from: this.startTitle,
@@ -75,6 +77,8 @@ class WikipediaScanner {
 
         const pool = new Pool(20);
 
+        //do a breadth first search on the links we know of from the last level, if we don't find it
+        //next time check all the links from all of the pages we're looking at now
         for (let i = 0; i < chains.length; i++) {
             const { links, path } = chains[i];
             for (let j = 0; j < links.length; j++) {
@@ -126,7 +130,13 @@ class WikipediaScanner {
         //otherwise keep scanning the next level
         return found ||  await this.scan(++level, nextChains);
     }
+    /**
+     * 
+     * @param title - A wikipedia page title
+     * @param pageChain - An array of page titles that it took to get here
+     */
     async checkPage(title: string, pageChain: Array<string>): Promise<LinkScanResult> {
+        //don't want to get too out of hand, each level can be exponentially more pages.
         if (pageChain.length > this.maxPageChain) {
             throw new Error(`Couldn't find ${this.endTitle} in ${this.maxPageChain} links`);
         }
@@ -135,6 +145,8 @@ class WikipediaScanner {
             .filter(link => !this.checkedTitles.has(link));
 
         this.stats.apiCalls++;
+
+        //if we can, see if the page we're looking for is linked on the current page
         const found = links.reduce((foundLink: any,link: string) => {
             if (foundLink) {
                 return foundLink;
@@ -156,7 +168,7 @@ class WikipediaScanner {
             }
         }, null);
 
-        //if we've found a link
+        //if we've found a link send it all the way up
         if (found) {
             return found;
         }
@@ -168,6 +180,11 @@ class WikipediaScanner {
         };
     }
 
+    /**
+     * Every so often this will log something in the UI. Since so many titles are being checked, it doesn't really matter that
+     * if we dont' show every title, but just a title every so often so you can see that it's still searching.
+     * @param str a string to show as "progress" in the UI.
+     */
     logInfrequently(str: string) {
         if (this.logNum++ % 1000 === 0) {
             this.progressLogFn(str);
@@ -177,7 +194,7 @@ class WikipediaScanner {
 
 export const scan = async (startTitle: string, endTitle: string, progressLogFn: Function) => {
     /**
-     * If a wikipedia page URL was entered, parse the title out of ti
+     * If a wikipedia page URL was entered, parse the title out of it
      * @param titleOrUrl - wikipedia page title or a URL to a wikipedia page
      */
     const parseTitle = (titleOrUrl: string) => {
@@ -187,9 +204,15 @@ export const scan = async (startTitle: string, endTitle: string, progressLogFn: 
         const u = new URL(titleOrUrl)
         return u.pathname.replace('/wiki/', '');
     }
+
+    /**
+     * If a link was entered, we need to get the page title without any character encoding, because "Kevin_Bacon" !== "Kevin Bacon"
+     * and we'd otherwise never find the right page.
+     */
     const normalized = (title: string) => {
         return wikipedia.getNormalizedTitle(title);
     }
+
     return await new WikipediaScanner(
         await normalized(parseTitle(startTitle)),
         await normalized(parseTitle(endTitle)),

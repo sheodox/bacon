@@ -71,7 +71,7 @@ export default class App extends React.Component<{}, AppState>{
             }
             else {
                 this.setState({
-                    //make sure we're using the normalized titles
+                    //make sure we're using the normalized titles, otherwise we might show a URL here and that would look ugly
                     startTitle: result.from,
                     endTitle: result.to,
                     scanning: false,
