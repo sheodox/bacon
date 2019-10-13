@@ -10,8 +10,6 @@ interface LinkScanResult {
     links: string[]
 }
 
-let logNum = 0;
-
 class WikipediaScanner {
     private checkedTitles: Set<string>;
     private maxPageChain: number;
@@ -23,12 +21,14 @@ class WikipediaScanner {
     };
     private startTime: number;
     private found: boolean;
+    private logNum: number;
 
     constructor(private startTitle: string, private endTitle: string, private progressLogFn: Function) {
         this.checkedTitles = new Set();
         this.maxPageChain = 10;
         this.startTime = 0;
         this.found = false;
+        this.logNum = 0;
 
         this.stats = {
             scanDuration: 0,
@@ -167,7 +167,7 @@ class WikipediaScanner {
     }
 
     logInfrequently(str: string) {
-        if (logNum++ % 1000 === 0) {
+        if (this.logNum++ % 1000 === 0) {
             this.progressLogFn(str);
         }
     }
