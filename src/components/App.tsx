@@ -96,6 +96,7 @@ export default class App extends React.Component<{}, AppState>{
 
         return (
             <div>
+                <p id="explanation">Enter the titles of two Wikipedia pages to find the shortest number of clicks from the first to the second!</p>
                 <PageInputs isScanning={this.state.scanning} submit={this.scan.bind(this)}></PageInputs>
                 <div className="panel">
                     <If renderWhen={this.state.scanning}>
