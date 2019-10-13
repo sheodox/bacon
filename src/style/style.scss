@@ -1,8 +1,14 @@
+$background: #272C38;
+$neon-blue: #00d0ff;
+$neon-pink: #ff00bf;
 * {
     box-sizing: border-box;
 }
 body {
     font-family: sans-serif;
+    color: white;
+    background-color: $background;
+
 }
 
 form {
@@ -11,11 +17,38 @@ form {
     }
 }
 
-.path-link {
+a {
     text-decoration: none;
-
+    color: cyan;
+}
+.path-link {
     &:not(:last-of-type)::after {
         content: ' → ';
-        color: black;
+        color: white;
     }
+}
+
+button {
+    background-color: lighten($background, 5%);
+    color: $neon-blue;
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    font-weight: bold;
+    border: none;
+    transition: color 0.1s, background-color 0.1s;
+
+    &:disabled {
+        color: darken($background, 5%);
+    }
+
+    &:not(:disabled):hover {
+        cursor: pointer;
+        background-color: lighten($background, 7%);
+        color: $neon-pink;
+    }
+}
+
+h1 {
+    text-shadow: $neon-pink 1px 2px, $neon-blue -2px -1px;
+    font-family: "Audiowide", sans-serif;
 }
